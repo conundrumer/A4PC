@@ -26,16 +26,24 @@ B_delayed = [ padding; B ];
 [A_delayed_avg A_delayed_dev] = get_avg_and_dev(A_delayed, B_padded);
 [B_delayed_avg B_delayed_dev] = get_avg_and_dev(B_delayed, A_padded);
 
-if A_delayed_avg < B_delayed_avg & A_delayed_dev < 3 * init_dev
-  % 'A delayed by this much'
-  % init_avg
-  A_ = A_delayed;
-  B_ = B_padded;
+if A_delayed_avg < init_avg & A_delayed_dev < 3 * init_dev
+  if A_delayed_avg < B_delayed_avg
+    % 'A delayed by this much'
+    % init_avg
+    A_ = A_delayed;
+    B_ = B_padded;
+  end
+elseif B_delayed_avg < init_avg & B_delayed_avg < 3 * init_dev
+  if B_delayed_avg < A_delayed_avg
+    % 'B delayed by this much'
+    % init_avg
+    A_ = A_padded;
+    B_ = B_delayed;
+  end
 else
-  % 'B delayed by this much'
-  % init_avg
-  A_ = A_padded;
-  B_ = B_delayed;
+  % 'A and B already approximately in phase'
+  A_ = A;
+  B_ = B;
 end
 
 end
