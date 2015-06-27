@@ -1,35 +1,40 @@
-n = 2048;
-% n = 256*4;
-hop = 512;
-% ratio = 16;
-ratio = 1;
 
-[A, fs] = audioread('./audio/wiggle_A.wav');
+
+[A, fs] = audioread('./audio/full_A.wav');
 A = A(:,1) + A(:,2);
-A = padarray(A, n);
 
-[B, fs] = audioread('./audio/wiggle_B.wav');
+[B, fs] = audioread('./audio/full_B.wav');
 B = B(:,1) + B(:,2);
+
+% B = B(850:length(B));
+
+A = A(1:length(B));
+
+
+% offset = 1 + fs*10;
+% dur = fs*30;
+% A = A(offset:offset+dur);
+% B = B(offset:offset+dur);
+
+% B = -B; % oops i already inverted the B samples
+
+
+[A, B] = normalize_delay(A, B);
+
+A = padarray(A, n);
 B = padarray(B, n);
-B = -B; % oops i already inverted the B samples
 
-cepstrum = get_interference_cepstrum(A, B, n, hop, ratio);
 
-% plot(sum(cepstrum,2));
 
-[M, I] = max(cepstrum,[],1);
-middle = median(I);
-((middle/ratio) - 1) * 2
-range = 5 * ratio;
-low = max(1, middle - range);
-high = min(ratio*n/2, middle + range);
+% 371.5 ms
+N = 2048;
+% N = 256*4;
+HOP = N/2;
+% ratio = 16;
 
-subplot(3,1,1);
-imagesc(cepstrum(low:high,:));
-subplot(3,1,2);
-plot((I-1)/ratio);
-subplot(3,1,3);
-plot(M);
+delays = get_int_delays(A, B, N, HOP);
+
+% plot(delays);
 
 C_left = zeros(length(A),1);
 C_right = zeros(length(A),1);
@@ -40,9 +45,9 @@ w = hann(2*hop);
 % o = -hop;
 o=0;
 
-for i = 2:length(I)-1
+for i = 2:length(delays)-1
   x = i * hop;
-  j = 2*round((I(i) - 1)/ratio);
+  j = delays(i);
   if o+x-j <= 0
     % I(i) = I(i+1);
     continue;
@@ -66,5 +71,7 @@ for i = 2:length(I)-1
 end
 
 % soundsc(A-B, fs);
-soundsc(A-C_left, fs);
-% soundsc(A-C_right, fs);
+% player = audioplayer(A-C_left, fs);
+player = audioplayer(A-C_right, fs);
+
+play(player);
