@@ -4,16 +4,17 @@ function [ A_, B_, delays_ ] = normalize_delay( A, B, N, HOP )
 % 371.5 ms
 RATIO = 1;
 BEGINNING_OFFSET = 1;
-ENDING_OFFSET = 2;
+ENDING_OFFSET = 6;
 
 %% get_avg_and_dev: returns average and deviation of delays
 function [avg, dev, delays] = get_avg_and_dev(A, B)
   cepstrum = get_interference_cepstrum(A, B, N, HOP, RATIO);
   [M, delays] = max(cepstrum,[],1);
   delays = 2*delays;
+  delays = delays - 1;
   delays(1:BEGINNING_OFFSET) = delays(BEGINNING_OFFSET+1);
   delays(length(delays)-ENDING_OFFSET:length(delays)) = delays(length(delays)-ENDING_OFFSET-1);
-  avg = round((mean(delays) - 1));
+  avg = round((mean(delays)));
   dev = round(std(delays));
 
   % subplot(2,1,1);
@@ -27,9 +28,17 @@ end
 
 [init_avg init_dev delays] = get_avg_and_dev( A, B );
 
+% init_avg
+
+% max(delays)
+
+% min(delays)
+
 range = max(max(delays) - init_avg, init_avg - min(delays));
 
-shift = init_avg - range - round(2*std(diff(delays)));
+deviation = round(2*std(diff(delays)));
+
+shift = init_avg - range - deviation;
 
 padding = zeros(shift, 1 );
 

@@ -3,7 +3,7 @@ function [ delays ] = get_int_delays( A, B, n, hop )
 % returns the instantaeous delays as integers
 % adjusted for sign and with outliers removed and interpolated
 RATIO = 2;
-MAX_DELAY_DIFF = 3;
+MAX_DELAY_DIFF = 2;
 
 cepstrum = get_interference_cepstrum(A, B, n, hop, RATIO);
 
@@ -69,7 +69,7 @@ for i = 2:length(delays)
 
   % flip signs if more optimal result
   d = delays(i);
-  if abs(-d - delays(prev_i)) < abs(d - delays(prev_i)) & abs(-d - avg_d) < MAX_DELAY_DIFF
+  if abs(-d - delays(prev_i)) < abs(d - delays(prev_i)) & abs(-d - avg_d) <= MAX_DELAY_DIFF
     delays(i) = -d;
   end
 
@@ -106,13 +106,13 @@ delays = round(delays);
 
 
 % plot(old_delays);
-hold on;
+% hold on;
 
 % % stem(avg * log(max_amp_diffs), 'x');
 % % stem(avg * abs(log(amp_LR_diffs)), 'x');
 % plot(delays, '-o');
 
-hold off;
+% hold off;
 
 end
 
